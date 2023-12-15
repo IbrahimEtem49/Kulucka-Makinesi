@@ -15,7 +15,7 @@ Bu projede kullanılan malzemeler;
     - Regülatör ile kullanılmak üzere 0.22µF ve 0.1µF kondansatör
 
 Şu anda projede 2 temel sorun var:
-- Bunlardan ilki enerji kesilirse değişkenlerdeki değerler gidiyor. (EEPROM'da kayıtlı olanlar hariç)
+- Bunlardan ilki enerji kesilirse değişkenlerdeki değerler gidiyor (EEPROM'da kayıtlı olanlar hariç).
 Özellikle millis değerinin sıfırlanması işleri zora sokabilir. Bunun için aklımda 2 çözüm var. Birinci
 ve bana en mantıklı geleni, belirli aralıklarla (6 saatte bir uygun olur sanırım) millis değerini EEPROM'a
 yedeklemek. İkincisi de sadece geçen gün sayısını, her gün geçişinde EEPROM'a kaydetmek ve 22. güne
