@@ -19,21 +19,22 @@ DallasTemperature sensors(&oneWire);
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
-#include <ItemCommand.h>
-#include <ItemSubMenu.h>
-#include <LcdMenu.h>
+#include <LcdMenu.h>      //LCD üzerinde kolayca menü oluşturmamızı sağlayan bir kütüphane (https://github.com/forntoh/LcdMenu)
+#include <ItemCommand.h>  //Menü seçeneklerini fonksiyonlara bağlamayı sağlayan, LcdMenu kütüphanesinin alt kütüphanesi
+#include <ItemSubMenu.h>  //Menü içinde menü oluşturmayı sağlayan, LcdMenu kütüphanesinin alt kütüphanesi
 
-void anaMenu();
-void sicaklikAyar();
+
+void anaMenu();         //Menüleri fonksiyonlara bağlayabilmek için menü tanımlamalarından önce, bağlanacakları fonksiyonları tanımlamak gerekiyor
+void sicaklikAyar();    //Aksi takdirde çalışmıyor
 void nemAyar();
 void cevirmeAyar();
 void gunAyar();
 void eepromKontrol();
 void sifirlama();
 
-MAIN_MENU(
-  ITEM_COMMAND("Ana Menu", anaMenu),
-  ITEM_COMMAND("Sicaklik Ayari", sicaklikAyar),
+MAIN_MENU(                                        //Menü tanımlamaları
+  ITEM_COMMAND("Ana Menu", anaMenu),              //Ana Menü isimli menüyü anaMenu fonksiyonuna bağlıyor
+  ITEM_COMMAND("Sicaklik Ayari", sicaklikAyar),   //Diğerleri de aynı mantıkla çalışıyor
   ITEM_COMMAND("Nem Ayari", nemAyar),
   ITEM_COMMAND("Cevirme Ayari", cevirmeAyar),
   ITEM_COMMAND("Kulucka Suresi", gunAyar),
@@ -41,7 +42,7 @@ MAIN_MENU(
   ITEM_COMMAND("Reset", sifirlama)
 );
 
-LcdMenu menu(2, 16);
+LcdMenu menu(2, 16);  //Kullandığımız ekranın boyutuna göre menüyü şekillendirecek olan komut
 
 const uint8_t bMenu = 2, bGeri = 3, bYukari = 4, bAsagi = 5, ledG = 6, ledR = 7, buzzer = 8, ampul = 9, nemNozulu = 10;
 float sicaklik, nem;
@@ -61,8 +62,18 @@ uint8_t eepromDonus, eepromKuluckasuresi;
 
 bool buzzerCalisti = false;
 
-#define BUTON_OKUMA(btn, islem) \
-  if (digitalRead(btn)) { \
+/*
+Görevi hangi butonun basıldığını tespit etmek olan BUTON_OKUMA isimli bir makro oluşturduk.
+Bu makro btn ve islem isminde 2 parametre alıyor.
+Parametre olarak yazılan değerler, kodlarda parametre isminin bulunduğu yerlere yerleştiriliyor.
+Örneğin "BUTON_OKUMA(bAsagi, down)" şeklindeki bir komut şu anlama gelir:
+if (digitalRead(bAsagi)) {           
+  while (digitalRead(bAsagi)); 
+  menu.down(); 
+}
+*/
+#define BUTON_OKUMA(btn, islem) \      
+  if (digitalRead(btn)) { \           
     while (digitalRead(btn)); \
     menu.islem(); \
   }
@@ -79,7 +90,7 @@ void setup() {
   digitalWrite(ampul, 0);
   digitalWrite(nemNozulu, 0);
 
-  menu.setupLcdWithMenu(0x27, mainMenu);
+  menu.setupLcdWithMenu(0x27, mainMenu); //menüyü aktif hale getiren komut
 }
 
 void loop() {
@@ -90,7 +101,7 @@ void loop() {
 
   sensors.requestTemperatures();
   sensors.setResolution(12);
-  sicaklik = sensors.getTempCByIndex(0);
+  sicaklik = sensors.getTempCByIndex(0);  //Sensörden gelen sıcaklık değerini santigrat derece cinsinden istedik ve sıcaklık değişkenine atadık
 
   nem = dht.readHumidity();
 
@@ -98,7 +109,11 @@ void loop() {
   sicaklikUyari();
   nemUyari();
   uyari();
-
+  
+  /*
+  Makroların açıklamasını yukarıda yapmıştım.
+  */
+  
   BUTON_OKUMA(bAsagi, down)
   BUTON_OKUMA(bYukari, up)
   BUTON_OKUMA(bMenu, enter)
@@ -187,7 +202,7 @@ void sicaklikAyar() {
     lcd.print("Yeni deger:"); lcd.print(sicaklikDegeri); lcd.print((char)223); lcd.print("C");
 
     if (digitalRead(bYukari)) {
-      sicaklikDegeri = constrain(sicaklikDegeri + 0.1, 35.0, 40.0);
+      sicaklikDegeri = constrain(sicaklikDegeri + 0.1, 35.0, 40.0);  //sicaklikDegeri değişkeninin değerini 35.0 ve 40.0 arasına sınırlandırdık. 
       delay(100);
     } else if (digitalRead(bAsagi)) {
       sicaklikDegeri = constrain(sicaklikDegeri - 0.1, 35.0, 40.0);
