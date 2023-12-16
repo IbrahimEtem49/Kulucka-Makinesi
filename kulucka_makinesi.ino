@@ -21,8 +21,6 @@ DHT dht(DHTPIN, DHTTYPE);
 
 #include <LcdMenu.h>      //LCD üzerinde kolayca menü oluşturmamızı sağlayan bir kütüphane (https://github.com/forntoh/LcdMenu)
 #include <ItemCommand.h>  //Menü seçeneklerini fonksiyonlara bağlamayı sağlayan, LcdMenu kütüphanesinin alt kütüphanesi
-#include <ItemSubMenu.h>  //Menü içinde menü oluşturmayı sağlayan, LcdMenu kütüphanesinin alt kütüphanesi
-
 
 void anaMenu();         //Menüleri fonksiyonlara bağlayabilmek için menü tanımlamalarından önce, bağlanacakları fonksiyonları tanımlamak gerekiyor
 void sicaklikAyar();    //Aksi takdirde çalışmıyor
