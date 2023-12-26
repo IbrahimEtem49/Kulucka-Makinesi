@@ -1,3 +1,7 @@
+/*
+Devrenin test işlemini kolaylaştırmak için düzenlenmiş değerlere sahip kod
+*/
+
 #include <EEPROM.h>
 
 #include <Servo.h>
