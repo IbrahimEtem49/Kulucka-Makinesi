@@ -51,15 +51,23 @@ const uint32_t saat = 3600000, gun = 86400000, gun21 = 1814400000;
 uint32_t sonDonus = 0;
 int sayac = 0;
 
+uint32_t sonSicaklikOkuma = 0;
+uint32_t sonNemOkuma = 0;
+uint32_t sonYedek = 0;
+uint32_t yedek;
+
 float sicaklikDegeri = 37.5, nemDegeri = 50.0;
 uint8_t dondurme = 6, kuluckaSuresi = 21;
 
-uint8_t kayitSicaklik = 100, kayitNem = 120, kayitDonus = 140, kayitKuluckasuresi = 160;
+uint8_t kayitSicaklik = 100, kayitNem = 120, kayitDonus = 140, kayitKuluckasuresi = 160, kayitYedek = 180;
 
 float eepromNem, eepromSicaklik;
 uint8_t eepromDonus, eepromKuluckasuresi;
+uint32_t eepromYedek;
 
 bool buzzerCalisti = false;
+
+int kalanGun;
 
 #define BUTON_OKUMA(btn, islem) \
   if (digitalRead(btn)) { \
@@ -87,22 +95,43 @@ void loop() {
   eepromSicaklik = EEPROM.get(kayitSicaklik, sicaklikDegeri);
   eepromDonus = EEPROM.get(kayitDonus, dondurme);
   eepromKuluckasuresi = EEPROM.get(kayitKuluckasuresi, kuluckaSuresi);
+  eepromYedek = EEPROM.get(kayitYedek, yedek);
 
-  sensors.requestTemperatures();
   sensors.setResolution(12);
-  sicaklik = sensors.getTempCByIndex(0);
+  sicaklikOkuma();
+  nemOkuma();
 
-  nem = dht.readHumidity();
-
+  yedekleme();
   donus(dondurme);
   sicaklikUyari();
   nemUyari();
   uyari();
 
+  kalanGun = (gun + yedek)/gun;
+  if (kalanGun > eepromKuluckasuresi){
+    yedek = 0;
+    kalanGun = 0;
+  } 
+
   BUTON_OKUMA(bAsagi, down)
   BUTON_OKUMA(bYukari, up)
   BUTON_OKUMA(bMenu, enter)
   BUTON_OKUMA(bGeri, back)
+}
+
+void nemOkuma(){
+  if (millis() - sonNemOkuma > 3*saniye) {
+    nem = dht.readHumidity();
+    sonNemOkuma = millis();
+  }
+}
+
+void sicaklikOkuma(){
+  if (millis() - sonSicaklikOkuma > 3*saniye) {
+    sensors.requestTemperatures();
+    sicaklik = sensors.getTempCByIndex(0);
+    sonSicaklikOkuma = millis();
+  }
 }
 
 void donus(uint32_t donusAralik) {
@@ -156,15 +185,13 @@ void uyari() {
 void anaMenu() {
   lcd.clear();
   while (true) {
-    sensors.requestTemperatures();
-    sicaklik = sensors.getTempCByIndex(0);
-    nem = dht.readHumidity();
+    sicaklikOkuma();
+    nemOkuma();
+    yedekleme();
     donus(dondurme);
     sicaklikUyari();
     nemUyari();
     uyari();
-    int kalanGun;
-    kalanGun = (gun + millis())/gun;
     lcd.setCursor(0, 0);
     lcd.print("Gun:"); lcd.print(kalanGun); lcd.print("/"); lcd.print(eepromKuluckasuresi); lcd.print(" ");
     lcd.setCursor(0, 1);
@@ -342,5 +369,17 @@ void sifirlama() {
       while(digitalRead(bMenu));
       break;
     }
+  }
+}
+
+void yedekleme(){
+  if (millis() - sonYedek > 10*dakika) {
+    if(millis() < yedek){
+      yedek = yedek + millis();
+    } else {
+      yedek = millis();
+    }
+    EEPROM.put(kayitYedek, yedek);
+    sonYedek = millis();
   }
 }
