@@ -158,10 +158,10 @@ bool sicaklikUyari() {
 
 bool nemUyari() {
   if (nem < eepromNem - 5) {
-    digitalWrite(nemNozulu, 1);
+    digitalWrite(nemNozulu, 0);
     return 1;
   } else {
-    digitalWrite(nemNozulu, 0);
+    digitalWrite(nemNozulu, 1);
     return 0;
   }
 }
