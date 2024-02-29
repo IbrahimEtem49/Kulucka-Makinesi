@@ -12,6 +12,4 @@ Bu projede kullanılan malzemeler;
 - MG996R Servo Motor
 - Nem Nozülü
 - Isıtıcı (Ampul veya rezistans kullanılabilir)
-- Eski bir uydu alıcısından sökülmüş besleme devresi (3.3V, 6V ve 12V çıkışları bulumakta)
-  - L7805CV Voltaj Regülatörü
-    - Regülatör ile kullanılmak üzere 0.22µF ve 0.1µF kondansatör
+- XL4016 DC Kıyıcı devresi, giriş olarak eski laptop adaptörü kullanıldı.
