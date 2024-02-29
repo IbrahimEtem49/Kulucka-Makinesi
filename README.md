@@ -7,7 +7,9 @@ Bu projede kullanılan malzemeler;
 - 3 adet Push-buton
 - Kırmızı ve Yeşil LED
 - Buzzer
-- 2 adet fan, biri nem nozülünün ürettiği kabın üzerine konularak üretilen nemi kuluçka makinesine gönderecek, diğeri kuluçka makinesinin havalandırmasını sağlayacak
+- 2 adet fan, biri nem nozülünün ürettiği kabın üzerine konularak üretilen nemi kuluçka makinesine gönderecek.
+  Diğeri kuluçka makinesinin havalandırmasını sağlayacak.
+  Nem nozülü için konulan fan yalnızca nem nozülü aktif olduğunda çalışmaktadır. Havalandırma fanı ise sürekli aktif.
 - 2'li Röle Modülü
 - MG996R Servo Motor
 - Nem Nozülü
