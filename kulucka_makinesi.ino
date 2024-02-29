@@ -43,7 +43,7 @@ MAIN_MENU(
 
 LcdMenu menu(2, 16);
 
-const uint8_t bMenu = 2, bGeri = 3, bYukari = 4, bAsagi = 5, ledG = 6, ledR = 7, buzzer = 8, ampul = 9, nemNozulu = 10;
+const uint8_t bMenu = 2, fan = 3, bYukari = 4, bAsagi = 5, ledG = 6, ledR = 7, buzzer = 8, ampul = 9, nemNozulu = 10;
 float sicaklik, nem;
 
 const uint16_t saniye = 1000, dakika = 60000;
@@ -53,19 +53,16 @@ int sayac = 0;
 
 uint32_t sonSicaklikOkuma = 0;
 uint32_t sonNemOkuma = 0;
-uint32_t sonYedek = 0;
-uint32_t yedek;
 
 float sicaklikDegeri = 37.5, nemDegeri = 50.0;
 uint8_t dondurme = 6, kuluckaSuresi = 21;
 
-uint8_t kayitSicaklik = 100, kayitNem = 120, kayitDonus = 140, kayitKuluckasuresi = 160, kayitYedek = 180;
+uint8_t kayitSicaklik = 100, kayitNem = 120, kayitDonus = 140, kayitKuluckasuresi = 160;
 
 float eepromNem, eepromSicaklik;
 uint8_t eepromDonus, eepromKuluckasuresi;
-uint32_t eepromYedek;
 
-bool buzzerCalisti = false;
+//bool buzzerCalisti = false;
 
 int kalanGun;
 
@@ -82,8 +79,8 @@ void setup() {
   myServo.attach(11);
   sensors.begin();
   dht.begin();
-  pinMode(bMenu, INPUT); pinMode(bYukari, INPUT); pinMode(bAsagi, INPUT); pinMode(bGeri, INPUT);
-  pinMode(ledG, OUTPUT); pinMode(ledR, OUTPUT); pinMode(buzzer, OUTPUT); pinMode(ampul, OUTPUT); pinMode(nemNozulu, OUTPUT);
+  pinMode(bMenu, INPUT); pinMode(bYukari, INPUT); pinMode(bAsagi, INPUT);
+  pinMode(ledG, OUTPUT); pinMode(ledR, OUTPUT); pinMode(buzzer, OUTPUT); pinMode(ampul, OUTPUT); pinMode(nemNozulu, OUTPUT); pinMode(fan, OUTPUT);
   digitalWrite(ampul, 1);
   digitalWrite(nemNozulu, 0);
 
@@ -95,39 +92,35 @@ void loop() {
   eepromSicaklik = EEPROM.get(kayitSicaklik, sicaklikDegeri);
   eepromDonus = EEPROM.get(kayitDonus, dondurme);
   eepromKuluckasuresi = EEPROM.get(kayitKuluckasuresi, kuluckaSuresi);
-  eepromYedek = EEPROM.get(kayitYedek, yedek);
 
   sensors.setResolution(12);
   sicaklikOkuma();
   nemOkuma();
 
-  yedekleme();
   donus(dondurme);
   sicaklikUyari();
   nemUyari();
   uyari();
 
-  kalanGun = (gun + yedek)/gun;
+  kalanGun = (gun + millis())/gun;
   if (kalanGun > eepromKuluckasuresi){
-    yedek = 0;
     kalanGun = 0;
   } 
 
   BUTON_OKUMA(bAsagi, down)
   BUTON_OKUMA(bYukari, up)
   BUTON_OKUMA(bMenu, enter)
-  BUTON_OKUMA(bGeri, back)
 }
 
 void nemOkuma(){
-  if (millis() - sonNemOkuma > 3*saniye) {
+  if (millis() - sonNemOkuma > 1*saniye) {
     nem = dht.readHumidity();
     sonNemOkuma = millis();
   }
 }
 
 void sicaklikOkuma(){
-  if (millis() - sonSicaklikOkuma > 3*saniye) {
+  if (millis() - sonSicaklikOkuma > 4*saniye) {
     sensors.requestTemperatures();
     sicaklik = sensors.getTempCByIndex(0);
     sonSicaklikOkuma = millis();
@@ -147,7 +140,7 @@ void donus(uint32_t donusAralik) {
 }
 
 bool sicaklikUyari() {
-  if (sicaklik < eepromSicaklik - 1) {
+  if (sicaklik < eepromSicaklik) {
     digitalWrite(ampul, 0);
     return 1;
   } else {
@@ -157,11 +150,13 @@ bool sicaklikUyari() {
 }
 
 bool nemUyari() {
-  if (nem < eepromNem - 5) {
-    digitalWrite(nemNozulu, 0);
+  if (nem < eepromNem) {
+    digitalWrite(nemNozulu, 1);
+    digitalWrite(fan, 1);
     return 1;
   } else {
-    digitalWrite(nemNozulu, 1);
+    digitalWrite(nemNozulu, 0);
+    digitalWrite(fan, 0);
     return 0;
   }
 }
@@ -170,15 +165,15 @@ void uyari() {
   bool sUyari = sicaklikUyari(), nUyari = nemUyari();
   if ((sUyari == 1) || (nUyari == 1)) {
     digitalWrite(ledR, 1); digitalWrite(ledG, 0);
-    if (!buzzerCalisti) { 
+    /*if (!buzzerCalisti) { 
       tone(buzzer, 1000); 
       delay(2000);
       noTone(buzzer);
       buzzerCalisti = true; 
-    }
+    }*/
   } else {
     digitalWrite(ledR, 0); digitalWrite(ledG, 1);
-    buzzerCalisti = false; 
+    //buzzerCalisti = false; 
   }
 }
 
@@ -187,7 +182,6 @@ void anaMenu() {
   while (true) {
     sicaklikOkuma();
     nemOkuma();
-    yedekleme();
     donus(dondurme);
     sicaklikUyari();
     nemUyari();
@@ -369,17 +363,5 @@ void sifirlama() {
       while(digitalRead(bMenu));
       break;
     }
-  }
-}
-
-void yedekleme(){
-  if (millis() - sonYedek > 10*dakika) {
-    if(millis() < yedek){
-      yedek = yedek + millis();
-    } else {
-      yedek = millis();
-    }
-    EEPROM.put(kayitYedek, yedek);
-    sonYedek = millis();
   }
 }
