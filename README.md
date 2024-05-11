@@ -15,3 +15,5 @@ Bu projede kullanılan malzemeler;
 - Nem Nozülü
 - Isıtıcı (Ampul veya rezistans kullanılabilir)
 - XL4016 DC Kıyıcı devresi, giriş olarak eski laptop adaptörü kullanıldı.
+
+(Güncellenecek)
